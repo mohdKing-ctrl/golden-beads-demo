@@ -412,6 +412,31 @@
   add('size_colour', 'Size / colour', 'المقاس / اللون');
   add('size_colour_ph', 'Size / colour (optional)', 'المقاس / اللون (اختياري)');
   add('no_products_yet', 'No products yet', 'لا توجد منتجات بعد');
+  add('nav_customers', 'Customers', 'العملاء');
+  add('pg_customers', 'Customers', 'العملاء');
+  add('pg_customers_s', 'Who buys from you, how much, and what is still owed', 'عملاؤك ومشترياتهم والمبالغ المتبقية');
+  add('search_customers', 'Search name, phone, address...', 'ابحث بالاسم أو الهاتف أو العنوان...');
+  add('customer_hint', 'The phone and address of a saved customer fill in by themselves when you type the name on a new sale.', 'العميل المحفوظ يُكتب هاتفه وعنوانه تلقائياً عند كتابة اسمه في عملية بيع جديدة.');
+  add('customer_note_ph', 'Optional - e.g. usual size, favourite colour', 'اختياري - مثلاً المقاس المعتاد أو اللون المفضل');
+  add('no_customers_s', 'They are added from a sale (Save as a new customer), or press Add customer', 'تُضاف من عملية البيع («حفظ كعميل جديد») أو اضغط «إضافة عميل»');
+  add('confirm_del_customer', 'Delete the customer "{name}"? Their bills are kept.', 'حذف العميل "{name}"؟ ستبقى فواتيره محفوظة.');
+  add('save_customer', 'Save as a new customer', 'حفظ كعميل جديد');
+  add('known_customer', 'Saved customer - {n} previous bill(s)', 'عميل محفوظ - {n} فاتورة سابقة');
+  add('last_purchase', 'Last purchase', 'آخر شراء');
+  add('s_bought', 'Total bought', 'إجمالي المشتريات');
+  add('r_top_customers', 'Top customers', 'أكثر العملاء شراءً');
+  add('statement', 'Print statement of account', 'طباعة كشف حساب');
+  add('wipe', 'Delete all invoices', 'حذف كل الفواتير');
+  add('confirm_wipe', 'DELETE all invoices? The customers and products stay. This cannot be undone. Download a backup first.', 'حذف كل الفواتير؟ يبقى العملاء والمنتجات. لا يمكن التراجع. نزّل نسخة احتياطية أولاً.');
+  add('print_choose', 'Print as', 'طباعة على شكل');
+  add('print_choose_s', 'Invoice {no} - choose the size of this print', 'الفاتورة {no} - اختر مقاس هذه الطباعة');
+  add('pr_a4', 'A4 page', 'ورقة A4');
+  add('pr_a4_s', 'Full invoice page', 'فاتورة بحجم صفحة كاملة');
+  add('pr_80', 'Receipt 80 mm', 'إيصال ٨٠ مم');
+  add('pr_80_s', 'Normal receipt printer', 'طابعة الإيصالات العادية');
+  add('pr_58', 'Small receipt 58 mm', 'إيصال صغير ٥٨ مم');
+  add('pr_58_s', 'Small / mobile printer', 'الطابعة الصغيرة أو المحمولة');
+  add('st_paper', 'Default print size (highlighted when you print)', 'مقاس الطباعة الافتراضي (يظهر مميزاً عند الطباعة)');
   add('no_products_yet_s', 'Add your pieces on the Products page, or use "Other item" below', 'أضف منتجاتك من صفحة «المنتجات»، أو استخدم «صنف آخر» بالأسفل');
 
   /* ---------------------------------------------------------- engine */

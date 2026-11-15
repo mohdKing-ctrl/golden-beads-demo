@@ -113,7 +113,7 @@
     });
     i.payments = (Array.isArray(i.payments) ? i.payments : []).filter(function (p) { return p && nz(p.amount) > 0; })
       .map(function (p) { p.amount = nz(p.amount); p.method = str(p.method) || 'cash'; p.date = str(p.date); return p; });
-    ['customerName', 'customerPhone', 'customerVat', 'customerAddr', 'table', 'note', 'date', 'time'].forEach(function (k) { i[k] = str(i[k]); });
+    ['customerId', 'customerName', 'customerPhone', 'customerVat', 'customerAddr', 'table', 'note', 'date', 'time'].forEach(function (k) { i[k] = str(i[k]); });
     if (['store', 'delivery'].indexOf(i.orderType) === -1) i.orderType = 'store';
     ['total', 'discount', 'vat', 'behalf', 'vatPct'].forEach(function (k) { i[k] = nz(i[k]); });
     i.office = i.office === undefined || i.office === null ? Math.max(0, nz(i.total) - i.vat - i.behalf + i.discount) : nz(i.office);
@@ -278,10 +278,11 @@
     var settings = S.settings;
     if (isServer()) {
       return call('reset', { resetCounter: !!resetCounter }).then(function () {
-        return call('restore', { data: { settings: settings, services: S.services, customers: [], invoices: [], counter: resetCounter ? 0 : S.counter } });
-      }).then(function () { S.customers = []; S.invoices = []; if (resetCounter) S.counter = 0; });
+        // "Delete all invoices" keeps the customer list: only the bills go
+        return call('restore', { data: { settings: settings, services: S.services, customers: S.customers, invoices: [], counter: resetCounter ? 0 : S.counter } });
+      }).then(function () { S.invoices = []; if (resetCounter) S.counter = 0; });
     }
-    return localOp(function () { S.customers = []; S.invoices = []; if (resetCounter) S.counter = 0; localSave(); });
+    return localOp(function () { S.invoices = []; if (resetCounter) S.counter = 0; localSave(); });
   }
 
   /* ------------------------------------------------ staff accounts (server only) */

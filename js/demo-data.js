@@ -39,16 +39,25 @@
       [10, 'delivery', 'شيخة', [['Embroidered abaya', 1, 'Size 58 - navy']], 0, 1, 'transfer', 'Instagram order', 'Al Khoudh, Muscat'],
       [9, 'store', '', [['Pearl bracelet', 2, 'White'], ['Beaded ring', 1, 'Size 7']], 0, 1, 'cash', '', ''],
       [8, 'store', 'ريم', [['Kaftan dress', 1, 'M - beige'], ['Evening clutch bag', 1, 'Gold']], 3, 1, 'card', '', ''],
+      [6, 'store', 'شيخة', [['Shaila (scarf)', 2, 'Navy']], 0, 1, 'cash', '', ''],
       [7, 'delivery', 'نوف', [['Prayer beads', 2, 'Amber'], ['Gift wrapping', 2, '']], 0, 0.5, 'transfer', 'Rest on delivery', 'Nizwa'],
       [6, 'store', '', [['Hair clip set', 2, ''], ['Brooch', 1, 'Pearl']], 0, 1, 'cash', '', ''],
       [5, 'store', 'فاطمة', [['Classic black abaya', 2, 'Size 54 / 56'], ['Shaila (scarf)', 2, 'Black']], 4, 1, 'card', '', ''],
       [4, 'store', '', [['Gold beaded necklace', 1, ''], ['Gift box', 1, '']], 0, 1, 'cash', '', ''],
       [3, 'delivery', 'عائشة', [['Embroidered abaya', 1, 'Size 52 - black'], ['Beaded earrings', 1, 'Silver']], 0, 0, 'cash', 'Pay on delivery', 'Seeb'],
       [2, 'store', 'خلود', [['Kaftan dress', 1, 'L - olive']], 0, 1, 'card', '', ''],
-      [1, 'store', '', [['Pearl bracelet', 1, 'Rose'], ['Beaded ring', 2, 'Size 6']], 0, 1, 'cash', '', ''],
+      [1, 'store', 'مريم', [['Pearl bracelet', 1, 'Rose'], ['Beaded ring', 2, 'Size 6']], 0, 1, 'cash', '', ''],
       [0, 'store', 'منى', [['Evening clutch bag', 1, 'Black'], ['Gift wrapping', 1, '']], 0, 1, 'card', '', ''],
       [0, 'store', '', [['Shaila (scarf)', 3, 'Black, beige, grey']], 0, 1, 'cash', '', '']
     ];
+
+    // example customers (no phone numbers on purpose); every named buyer above is one of them
+    var CUST = [
+      ['مريم', '', 'Usually size 54'], ['شيخة', 'Al Khoudh, Muscat', 'Likes navy and black'], ['ريم', '', ''], ['نوف', 'Nizwa', ''],
+      ['فاطمة', '', ''], ['عائشة', 'Seeb', 'Pays on delivery'], ['خلود', '', ''], ['منى', '', 'Gift wrapping every time']
+    ];
+    var customers = CUST.map(function (c, i) { return { id: 'c' + (i + 1), name: c[0], phone: '', vatNo: '', addr: c[1], notes: c[2] }; });
+    var custByName = {}; customers.forEach(function (c) { custByName[c.name] = c; });
 
     var invoices = [];
     plan.forEach(function (p, i) {
@@ -62,14 +71,14 @@
       invoices.push({
         id: String(no), no: no, number: s.prefix + '-' + String(no).padStart(5, '0'), created: Math.floor(Date.now() / 1000) - p[0] * 86400, createdBy: 'Example',
         date: date, time: pad(10 + (i * 2) % 11) + ':' + pad((i * 17) % 60),
-        customerName: p[2] || 'عميل نقدي', customerPhone: '', customerVat: '', customerAddr: p[1] === 'delivery' ? p[8] : '',
+        customerId: p[2] && custByName[p[2]] ? custByName[p[2]].id : '', customerName: p[2] || 'عميل نقدي', customerPhone: '', customerVat: '', customerAddr: p[1] === 'delivery' ? p[8] : '',
         orderType: p[1], table: '',
         items: items, discount: r3(disc), vatPct: 0, vat: 0, office: office, behalf: 0, total: total,
         payments: paid > 0 ? [{ date: date, amount: paid, method: p[6] }] : [],
         job: 'done', note: p[7], void: false, cr: s.cr, vatNo: ''
       });
     });
-    return { settings: s, services: services, customers: [], invoices: invoices, counter: invoices.length };
+    return { settings: s, services: services, customers: customers, invoices: invoices, counter: invoices.length };
   }
 
   window.PS_DEMO = { seed: seed };

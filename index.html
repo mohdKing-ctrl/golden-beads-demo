@@ -9,7 +9,7 @@
 <meta name="theme-color" content="#1d1b18">
 <link rel="icon" type="image/png" href="img/favicon-64.png">
 <link rel="apple-touch-icon" href="img/icon-192.png">
-<link rel="stylesheet" href="css/styles.css?v=afbaddcd">
+<link rel="stylesheet" href="css/styles.css?v=ea54dd42">
 <link rel="stylesheet" href="css/demo.css?v=f01ff39e">
 <style id="pageStyle"></style>
 </head>
@@ -58,7 +58,8 @@
   <nav class="navi" id="nav">
     <button data-view="new" class="active"><span class="ic">&#10133;</span> <span data-i18n="nav_new"></span></button>
     <button data-view="invoices"><span class="ic">&#129534;</span> <span data-i18n="nav_invoices"></span> <span class="badge" id="navCount">0</span></button>
-    <button data-view="services"><span class="ic">&#128717;</span> <span data-i18n="nav_services"></span></button>
+    <button data-view="customers"><span class="ic">&#128101;</span> <span data-i18n="nav_customers"></span></button>
+    <button data-view="services"><span class="ic">&#128230;</span> <span data-i18n="nav_services"></span></button>
     <button data-view="reports"><span class="ic">&#128202;</span> <span data-i18n="nav_reports"></span></button>
     <button data-view="settings"><span class="ic">&#9881;</span> <span data-i18n="nav_settings"></span></button>
   </nav>
@@ -90,6 +91,8 @@
             <div class="fld"><label data-i18n="phone"></label><input id="nvPhone" class="ltr-in" inputmode="tel" placeholder="9xxx xxxx" dir="ltr" style="text-align:start"></div>
             <div class="fld"><label data-i18n="date"></label><input type="date" id="nvDate"></div>
           </div>
+          <div class="custknown" id="nvCustKnown" hidden></div>
+          <label class="switch" id="nvSaveCustWrap" hidden><input type="checkbox" id="nvSaveCust" checked> <span data-i18n="save_customer"></span></label>
         </div>
 
         <div class="card">
@@ -159,10 +162,24 @@
     </table></div></div>
   </div>
 
+  <!-- ============ CUSTOMERS ============ -->
+  <div id="view-customers" class="page">
+    <div class="stats" id="cuStats"></div>
+    <div class="toolbar">
+      <div class="search"><span class="mg">&#128269;</span><input id="cuSearch" data-i18n-ph="search_customers" autocomplete="off"></div>
+      <span class="grow"></span>
+      <button class="tbtn b-ok" id="cuAdd" type="button">&#10133; <span data-i18n="add_customer"></span></button>
+    </div>
+    <div class="tblcard"><div class="tblwrap"><table class="rtable">
+      <thead><tr><th data-i18n="customer"></th><th data-i18n="phone"></th><th data-i18n="s_invoices"></th><th data-i18n="last_purchase"></th><th data-i18n="s_bought"></th><th data-i18n="balance"></th><th></th></tr></thead>
+      <tbody id="cuBody"></tbody>
+    </table></div></div>
+  </div>
+
   <!-- ============ SERVICES ============ -->
   <div id="view-services" class="page">
     <div class="card">
-      <div class="chead"><h3>&#128717; <span data-i18n="price_list"></span></h3>
+      <div class="chead"><h3>&#128230; <span data-i18n="price_list"></span></h3>
         <div style="display:flex;gap:9px;flex-wrap:wrap">
           <button class="tbtn b-ok" id="svAdd" type="button">&#10133; <span data-i18n="add_service"></span></button>
           <button class="tbtn b-info" id="svManage" type="button">&#9881; <span data-i18n="manage_lists"></span></button>
@@ -198,7 +215,7 @@
     </div>
     <div class="two" style="margin-top:18px">
       <div class="card"><div class="chead"><h3 data-i18n="r_order_types"></h3></div><div id="rpTypes"></div></div>
-      <div></div>
+      <div class="card"><div class="chead"><h3 data-i18n="r_top_customers"></h3></div><div id="rpTopCust"></div></div>
     </div>
   </div>
 
@@ -298,6 +315,18 @@
   <div class="duo"><button class="btn b-main" style="margin-top:0" id="clAdd" type="button" data-i18n="add_to_invoice"></button><button class="btn b-soft" type="button" data-close data-i18n="cancel"></button></div>
 </div></div>
 
+<div class="modal" id="custModal" hidden><div class="mbox">
+  <h3 id="cmTitle"></h3><div class="msub" data-i18n="customer_hint"></div>
+  <div class="fields">
+    <div class="fld full"><label data-i18n="customer_name"></label><input id="cmName" autocomplete="off"></div>
+    <div class="fld"><label data-i18n="phone"></label><input id="cmPhone" inputmode="tel" dir="ltr" style="text-align:start" placeholder="9xxx xxxx"></div>
+    <div class="fld"><label data-i18n="address"></label><input id="cmAddr" autocomplete="off"></div>
+    <div class="fld full"><label data-i18n="note"></label><input id="cmNotes" data-i18n-ph="customer_note_ph" autocomplete="off"></div>
+  </div>
+  <div class="err" id="cmErr"></div>
+  <div class="duo"><button class="btn b-main" style="margin-top:0" id="cmSave" type="button" data-i18n="save"></button><button class="btn b-soft" type="button" data-close data-i18n="cancel"></button></div>
+</div></div>
+
 <div class="modal" id="svcModal" hidden><div class="mbox">
   <h3 id="smTitle"></h3><div class="msub" data-i18n="service_hint"></div>
   <div class="fields">
@@ -322,24 +351,36 @@
   <button class="btn b-soft" type="button" data-close style="margin-top:16px" data-i18n="close"></button>
 </div></div>
 
+<div class="modal" id="printModal" hidden><div class="mbox">
+  <h3 data-i18n="print_choose"></h3><div class="msub" id="prSub"></div>
+  <div class="prchoice" id="prChoice">
+    <button type="button" data-paper="a4"><span class="pi a4"></span><b data-i18n="pr_a4"></b><small data-i18n="pr_a4_s"></small></button>
+    <button type="button" data-paper="80"><span class="pi r80"></span><b data-i18n="pr_80"></b><small data-i18n="pr_80_s"></small></button>
+    <button type="button" data-paper="58"><span class="pi r58"></span><b data-i18n="pr_58"></b><small data-i18n="pr_58_s"></small></button>
+  </div>
+  <button class="btn b-soft" type="button" data-close style="margin-top:14px" data-i18n="cancel"></button>
+</div></div>
+
 <button type="button" class="cartbar" id="nvBar" hidden><span id="nvBarTxt"></span><b data-i18n="view_bill"></b></button>
 
 <div class="toast" id="toast"></div>
 <div id="printArea"></div>
 
-<script src="js/i18n.js?v=ce53e363"></script>
+<script src="js/i18n.js?v=85854777"></script>
 <script src="js/core.js?v=93e0a461"></script>
+<script src="js/combo.js?v=9704f11b"></script>
 <script src="js/catalog.js?v=a0b34035"></script>
 <script src="js/xlsx.js?v=1d957b6d"></script>
-<script src="js/demo-data.js?v=c072d9c5"></script>
-<script src="js/store.js?v=576d7f8f"></script>
-<script src="js/print.js?v=aac126ae"></script>
-<script src="js/invoice.js?v=8416be98"></script>
+<script src="js/demo-data.js?v=f1108855"></script>
+<script src="js/store.js?v=768d8cd5"></script>
+<script src="js/print.js?v=c0c68619"></script>
+<script src="js/invoice.js?v=ff5a5582"></script>
 <script src="js/invoices.js?v=bcb936bc"></script>
+<script src="js/customers.js?v=e344e967"></script>
 <script src="js/services.js?v=1a242449"></script>
-<script src="js/reports.js?v=4aa6d440"></script>
+<script src="js/reports.js?v=96395ad9"></script>
 <script src="js/settings.js?v=3d232fb0"></script>
-<script src="js/app.js?v=e7716f94"></script>
+<script src="js/app.js?v=c23436e1"></script>
 <script src="js/demo-mode.js?v=519d6431"></script>
 </body>
 </html>

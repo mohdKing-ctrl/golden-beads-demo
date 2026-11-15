@@ -20,8 +20,9 @@
 
   function collect() {
     var r = range(), out = {
-      list: [], billed: 0, base: 0, behalf: 0, vat: 0, disc: 0, paid: 0, cats: {}, custs: {}, days: {}, methods: {}, types: {}
+      list: [], billed: 0, base: 0, behalf: 0, vat: 0, disc: 0, paid: 0, cats: {}, custs: {}, buyers: {}, days: {}, methods: {}, types: {}
     };
+    var walkIn = [I18N.dict.en.walk_in, I18N.dict.ar.walk_in, ''];
     Store.s.invoices.forEach(function (i) {
       if (i.void || i.date < r[0] || i.date > r[1]) return;
       out.list.push(i);
@@ -33,6 +34,10 @@
         var key = it.sid || it.n, c = out.custs[key] || (out.custs[key] = { name: I18N.pick(it.n, it.a), n: 0, billed: 0 });
         c.n += num(it.q); c.billed += Calc.line(it);
       });
+      if (walkIn.indexOf(i.customerName) === -1) {        // top customers: named buyers only, not walk-in
+        var bk = i.customerName.toLowerCase(), b = out.buyers[bk] || (out.buyers[bk] = { name: i.customerName, n: 0, billed: 0 });
+        b.n++; b.billed += i.total;
+      }
       var tp = out.types[i.orderType || 'store'] || (out.types[i.orderType || 'store'] = { n: 0, v: 0 });
       tp.n++; tp.v += i.total;
       out.days[i.date] = (out.days[i.date] || 0) + i.total;
@@ -80,6 +85,8 @@
     $('rpCusts').innerHTML = bars(custs.map(function (c) {
       return { l: c.name + ' (x' + c.n + ')', v: c.billed };
     }));
+    var buyers = Object.keys(d.buyers).map(function (k) { return d.buyers[k]; }).sort(function (a, b) { return b.billed - a.billed; }).slice(0, 8);
+    $('rpTopCust').innerHTML = bars(buyers.map(function (c) { return { l: c.name + ' (' + c.n + ')', v: c.billed }; }));
     $('rpTypes').innerHTML = bars(Catalog.ORDER_TYPES.filter(function (o) { return d.types[o.id]; }).map(function (o) {
       return { l: o.ic + ' ' + I18N.pick(o.en, o.ar) + ' (' + d.types[o.id].n + ')', v: d.types[o.id].v };
     }), true);

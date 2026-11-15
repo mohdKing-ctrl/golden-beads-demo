@@ -5,7 +5,7 @@
   var current = 'new';
   var inited = false;
   var PREF_KEY = 'goldenbeads_pos_pref';
-  var VIEWS = ['new', 'invoices', 'services', 'reports', 'settings'];
+  var VIEWS = ['new', 'invoices', 'customers', 'services', 'reports', 'settings'];
   var ADMIN_ONLY = { services: 1, reports: 1 };
 
   function t(k, v) { return I18N.t(k, v); }
@@ -43,11 +43,11 @@
     VIEWS.forEach(function (v) { $('view-' + v).classList.toggle('active', v === view); });
     document.querySelectorAll('.navi button').forEach(function (b) { b.classList.toggle('active', b.dataset.view === view); });
     updateTitle();
-    var map = { new: NewInvoice, invoices: Invoices, services: Services, reports: Reports, settings: Settings };
+    var map = { new: NewInvoice, invoices: Invoices, customers: Customers, services: Services, reports: Reports, settings: Settings };
     map[view].refresh();
     window.scrollTo(0, 0);
     // Another device may have added bills: pick up the newest data when these screens are opened.
-    if (Store.isServer() && (view === 'invoices' || view === 'reports')) {
+    if (Store.isServer() && (view === 'invoices' || view === 'customers' || view === 'reports')) {
       Store.reload().then(function () { if (current === view) { map[view].refresh(); updateBadge(); } }).catch(function () { /* keep showing what we have */ });
     }
   }
@@ -67,6 +67,7 @@
   function refreshAll() {
     NewInvoice.refresh(); applyBranding(); updateBadge(); updateWho();
     if (current === 'invoices') Invoices.refresh();
+    if (current === 'customers') Customers.refresh();
     if (current === 'services') Services.refresh();
     if (current === 'reports') Reports.refresh();
     if (current === 'settings') Settings.refresh();
@@ -132,7 +133,7 @@
   function start() {
     $('gate').hidden = true;
     if (!inited) {
-      NewInvoice.init(); Invoices.init(); Services.init(); Reports.init(); Settings.init();
+      NewInvoice.init(); Invoices.init(); Customers.init(); Services.init(); Reports.init(); Settings.init();
       inited = true;
     }
     NewInvoice.refresh(); applyBranding(); updateBadge(); updateWho();

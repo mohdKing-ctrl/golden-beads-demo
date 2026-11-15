@@ -111,6 +111,49 @@
       '<div class="ft">' + esc(s.footer) + '<br>- - - - - - - - - -</div></div>';
   }
 
+  /* ------------------------------------------------ customer statement (A4) */
+  function statement(cust, list) {
+    var s = S(), cr = s.cr;
+    list = (list || []).slice().sort(function (a, b) { return a.no - b.no; });
+    var tot = 0, paid = 0;
+    var rows = list.map(function (i) {
+      var p = Calc.paid(i), b = Calc.balance(i); tot += i.total; paid += p;
+      var what = i.items.map(function (it) { return esc(it.n) + (it.q !== 1 ? ' &times;' + esc(it.q) : ''); }).join(', ');
+      return '<tr><td class="c">' + fdate(i.date) + '</td><td class="c"><span class="ltr">' + esc(i.number) + '</span></td><td>' + what +
+        '</td><td class="n">' + f3(i.total) + '</td><td class="n">' + f3(p) + '</td><td class="n">' + f3(b) + '</td></tr>';
+    }).join('');
+    return '<div class="inv stmt">' +
+      '<div class="hd"><div class="l"><h1>' + esc(s.name) + '</h1><div class="sm">' + esc(s.addr) + '</div>' +
+        (s.phone ? '<div class="sm">Tel: <span class="ltr">' + esc(s.phone) + '</span></div>' : '') + (cr ? '<div class="sm">C.R. No: <b class="ltr">' + esc(cr) + '</b></div>' : '') + '</div>' +
+      '<img src="' + logo + '" alt=""><div class="r"><h1>' + esc(s.nameAr) + '</h1><div class="sm">' + esc(s.addrAr) + '</div>' +
+        (cr ? '<div class="sm">السجل التجاري: <b class="ltr">' + esc(cr) + '</b></div>' : '') + '</div></div><div class="goldbar"></div>' +
+      '<div class="doc">STATEMENT OF ACCOUNT<small>كشف حساب</small></div>' +
+      '<div class="box" style="margin-bottom:8px">' + row('Customer', 'العميل', esc(cust.name)) + row('Phone', 'الهاتف', cust.phone ? cell(cust.phone) : '') +
+        row('Address', 'العنوان', esc(cust.addr || '')) + row('Date', 'التاريخ', '<span class="ltr">' + fdate(ymd()) + '</span>') + '</div>' +
+      '<table><thead><tr><th class="c">Date / التاريخ</th><th class="c">Invoice / الفاتورة</th><th>Products / المنتجات</th><th class="n">Total / الإجمالي</th><th class="n">Paid / المدفوع</th><th class="n">Balance / المتبقي</th></tr></thead><tbody>' + rows + '</tbody></table>' +
+      '<div class="bottom"><div></div><div class="tot">' + row('Total bought', 'إجمالي المشتريات', f3(tot)) + row('Total paid', 'إجمالي المدفوع', f3(paid)) +
+        '<div class="grand"><span>BALANCE DUE / المستحق (OMR)</span><span>' + f3(r3(tot - paid)) + '</span></div></div></div>' +
+      '<div class="foot">' + esc(s.footer) + '</div></div>';
+  }
+
+  /* ------------------------------------------------ choose the size every time a bill is printed */
+  var pending = null;
+  function choose(inv) {
+    pending = inv;
+    var def = S().paper; def = (def === '80' || def === '58') ? def : 'a4';
+    $('prSub').textContent = I18N.t('print_choose_s', { no: inv.number });
+    $('prChoice').querySelectorAll('button').forEach(function (b) { b.classList.toggle('def', b.dataset.paper === def); });
+    App.openModal('printModal');
+    var d = $('prChoice').querySelector('.def'); if (d) setTimeout(function () { d.focus(); }, 50);
+  }
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('#prChoice [data-paper]'); if (!b || !pending) return;
+    var inv = pending; pending = null;
+    App.closeModal('printModal');
+    printAs(inv, b.dataset.paper);
+  });
+  function printAs(inv, p) { p = (p === '80' || p === '58') ? p : 'a4'; run(p === 'a4' ? a4(inv) : thermal(inv), p); }
+
   /* ------------------------------------------------ print engine */
   function run(html, paper) {
     $('printArea').innerHTML = html;
@@ -126,10 +169,9 @@
   }
 
   window.Print = {
-    invoice: function (inv) {
-      var p = S().paper; p = (p === '80' || p === '58') ? p : 'a4';
-      run(p === 'a4' ? a4(inv) : thermal(inv), p);
-    },
+    invoice: function (inv) { if (inv) choose(inv); },          // asks: A4, 80 mm receipt or 58 mm receipt
+    invoiceAs: printAs,
+    statement: function (cust, list) { run(statement(cust, list), 'a4'); },
     html: function (inv) { var p = S().paper; return (p === '80' || p === '58') ? thermal(inv) : a4(inv); },
     PAYM: PAYM, docType: docType
   };

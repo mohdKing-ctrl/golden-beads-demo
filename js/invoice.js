@@ -7,6 +7,7 @@
   var curCat = 'all';
   var payTouched = false;
   var saving = false;
+  var custId = null;        // the saved customer this sale belongs to (null = walk-in / not saved)
   var saveKey = null, saveFp = '';      // one-time key of the bill being saved (kept while a save is being retried)
 
   function t(k, v) { return I18N.t(k, v); }
@@ -127,6 +128,27 @@
     App.closeModal('customModal'); renderCart();
   }
 
+  /* ------------------------------------------------ customer */
+  function findCustomer(v) {
+    v = String(v || '').trim().toLowerCase();
+    return v ? S().customers.filter(function (x) { return x.name.toLowerCase() === v; })[0] : null;
+  }
+  function matchCustomer() {
+    var v = $('nvName').value.trim(), c = findCustomer(v);
+    custId = c ? c.id : null;
+    if (c) {
+      if (c.phone) $('nvPhone').value = c.phone;
+      if (c.addr && !$('nvAddr').value.trim()) $('nvAddr').value = c.addr;
+      var f = Customers.invoicesOf(c), bal = 0;
+      f.forEach(function (i) { bal += Calc.balance(i); });
+      $('nvCustKnown').innerHTML = '&#10004; ' + esc(t('known_customer', { n: f.length })) +
+        (bal > 0.0004 ? ' &middot; <b class="due">' + esc(t('balance_due')) + ': ' + f3(bal) + ' ' + esc(t('omr')) + '</b>' : '') +
+        (c.notes ? '<div class="mini">' + esc(c.notes) + '</div>' : '');
+    }
+    $('nvCustKnown').hidden = !c;
+    $('nvSaveCustWrap').hidden = !!c || !v;
+  }
+
   /* ------------------------------------------------ save */
   function build() {
     var s = S().settings, tt = calc();
@@ -138,7 +160,7 @@
     var date = $('nvDate').value || ymd(d);
     return {
       date: date, time: hm(d),
-      customerName: $('nvName').value.trim() || t('walk_in'),
+      customerId: custId, customerName: $('nvName').value.trim() || t('walk_in'),
       customerPhone: $('nvPhone').value.trim(),
       customerAddr: otype === 'delivery' ? $('nvAddr').value.trim() : '',
       orderType: otype, table: '',
@@ -159,8 +181,18 @@
     var fp = JSON.stringify([inv.items, inv.customerName, inv.customerPhone, inv.customerAddr, inv.orderType, inv.date, inv.total, inv.payments, inv.discount, inv.note]);
     if (!saveKey || fp !== saveFp) { saveKey = uid('k'); saveFp = fp; }     // edited since the failed attempt = a different bill
     inv.clientKey = saveKey;
+    var needCust = !custId && $('nvName').value.trim() && $('nvSaveCust').checked;
     saving = true; setBusy(true);
-    Store.createInvoice(inv).then(function (saved) {
+    var chain = Promise.resolve();
+    if (needCust) {
+      var again = findCustomer(inv.customerName);         // already saved by an earlier attempt of this same sale
+      if (again) { custId = again.id; inv.customerId = again.id; }
+      else {
+        var c = { id: uid('c'), name: inv.customerName, phone: inv.customerPhone, vatNo: '', addr: inv.customerAddr, notes: '' };
+        chain = Store.saveCustomer(c).then(function () { custId = c.id; inv.customerId = c.id; });
+      }
+    }
+    chain.then(function () { return Store.createInvoice(inv); }).then(function (saved) {
       saveKey = null; saveFp = '';
       toast(t('invoice_saved', { no: saved.number }));
       reset(true);
@@ -173,7 +205,8 @@
 
   function reset(silent) {
     if (!silent && cart.length && !confirm(t('confirm_clear'))) return;
-    cart = []; payTouched = false; saveKey = null; saveFp = '';
+    cart = []; payTouched = false; saveKey = null; saveFp = ''; custId = null;
+    $('nvCustKnown').hidden = true; $('nvSaveCustWrap').hidden = true; $('nvSaveCust').checked = true;
     ['nvName', 'nvPhone', 'nvAddr', 'nvNote'].forEach(function (id) { $(id).value = ''; });
     $('nvDisc').value = '';
     $('nvDate').value = ymd(); $('nvPay').value = 'cash'; otype = 'store';
@@ -189,6 +222,9 @@
       var b = e.target.closest('button'); if (!b) return; curCat = b.dataset.cat; renderCats(); renderGrid();
     });
     $('nvSearch').addEventListener('input', renderGrid);
+    Combo.attach($('nvName'), function () { return S().customers.map(function (c) { return c.name; }); });
+    $('nvName').addEventListener('input', matchCustomer);
+    $('nvName').addEventListener('change', matchCustomer);
     $('nvGrid').addEventListener('click', function (e) {
       var b = e.target.closest('.svc'); if (!b) return;
       if (b.dataset.custom) openCustom(); else addService(b.dataset.sid);
