@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>تجربة نظام جولدن بيدز - DEMO</title>
+<meta name="description" content="Golden Beads Collection boutique - point of sale and invoicing">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#1d1b18">
+<link rel="icon" type="image/png" href="img/favicon-64.png">
+<link rel="apple-touch-icon" href="img/icon-192.png">
+<link rel="stylesheet" href="css/styles.css?v=afbaddcd">
+<link rel="stylesheet" href="css/demo.css?v=f01ff39e">
+<style id="pageStyle"></style>
+</head>
+<body>
+
+<!-- ================= LOGIN / FIRST-RUN GATE ================= -->
+<div id="gate">
+  <div class="gatebox">
+    <div class="glogo"><img src="img/logo.jpg" alt="Golden Beads"></div>
+    <h1 id="gateTitle"></h1>
+    <p id="gateSub"></p>
+    <div id="gLoading" class="mini" data-i18n="loading">...</div>
+
+    <form id="gLogin" style="display:none" autocomplete="on">
+      <div class="fld"><label data-i18n="username"></label><input id="lgUser" autocomplete="username" autocapitalize="none" spellcheck="false" required></div>
+      <div class="fld"><label data-i18n="password"></label><input id="lgPass" type="password" autocomplete="current-password" required></div>
+      <button class="btn b-main" type="submit" data-i18n="sign_in"></button>
+    </form>
+
+    <form id="gSetup" style="display:none" autocomplete="off">
+      <div class="gsub" data-i18n="owner_account"></div>
+      <div class="fld"><label data-i18n="your_name"></label><input id="suName" required></div>
+      <div class="fld"><label data-i18n="username"></label><input id="suUser" autocapitalize="none" spellcheck="false" placeholder="owner" required></div>
+      <div class="fld"><label data-i18n="password_min"></label><input id="suPass" type="password" autocomplete="new-password" minlength="8" required></div>
+      <div class="fld"><label data-i18n="password_again"></label><input id="suPass2" type="password" autocomplete="new-password" minlength="8" required></div>
+      <div class="gsub" data-i18n="support_account"></div>
+      <p class="gnote" data-i18n="support_hint"></p>
+      <div class="fld"><label data-i18n="your_name"></label><input id="suVName" autocomplete="off" placeholder="Support"></div>
+      <div class="fld"><label data-i18n="username"></label><input id="suVUser" autocapitalize="none" spellcheck="false" autocomplete="off" placeholder="support"></div>
+      <div class="fld"><label data-i18n="password_min"></label><input id="suVPass" type="password" autocomplete="new-password"></div>
+      <button class="btn b-main" type="submit" data-i18n="create_account"></button>
+    </form>
+
+    <button class="btn b-main" id="gRetry" type="button" style="display:none" data-i18n="try_again"></button>
+    <div class="err" id="gateErr"></div>
+    <div class="gatelang"><button type="button" data-lang="ar">العربية</button><button type="button" data-lang="en">English</button></div>
+  </div>
+</div>
+
+<!-- ================= SIDEBAR ================= -->
+<aside>
+  <div class="brand">
+    <div class="logo"><img src="img/logo.jpg" alt="Golden Beads"></div>
+    <div class="t"><span id="brandName"></span><small id="brandSub"></small></div>
+  </div>
+  <nav class="navi" id="nav">
+    <button data-view="new" class="active"><span class="ic">&#10133;</span> <span data-i18n="nav_new"></span></button>
+    <button data-view="invoices"><span class="ic">&#129534;</span> <span data-i18n="nav_invoices"></span> <span class="badge" id="navCount">0</span></button>
+    <button data-view="services"><span class="ic">&#128717;</span> <span data-i18n="nav_services"></span></button>
+    <button data-view="reports"><span class="ic">&#128202;</span> <span data-i18n="nav_reports"></span></button>
+    <button data-view="settings"><span class="ic">&#9881;</span> <span data-i18n="nav_settings"></span></button>
+  </nav>
+  <div class="side-b">
+    <div class="modebar" id="modebar" data-i18n="demo_banner"></div>
+    <div class="viewbar" id="viewbar" style="display:none" data-i18n="view_only_banner"></div>
+    <div class="lang"><button type="button" data-lang="ar">العربية</button><button type="button" data-lang="en">English</button></div>
+    <div class="who" id="who"></div>
+    <button class="sidebtn" id="btnLogout" type="button">&#128682; <span data-i18n="sign_out"></span></button>
+  </div>
+</aside>
+
+<main>
+  <div class="topbar">
+    <h2 id="pgTitle"></h2>
+    <div class="clock" id="clock"></div>
+  </div>
+
+  <!-- ============ NEW INVOICE ============ -->
+  <div id="view-new" class="page active">
+    <div class="pos">
+      <div>
+        <div class="card">
+          <div class="chead"><h3><span class="step">1</span> <span data-i18n="step_order"></span></h3><span class="chip c-mut" id="nvNo"></span></div>
+          <div class="seg" id="nvType" style="margin-bottom:12px"></div>
+          <div class="fields">
+            <div class="fld" id="nvAddrWrap" style="display:none"><label data-i18n="delivery_address"></label><input id="nvAddr" autocomplete="off"></div>
+            <div class="fld"><label data-i18n="customer_name"></label><input id="nvName" autocomplete="off" data-i18n-ph="walk_in"></div>
+            <div class="fld"><label data-i18n="phone"></label><input id="nvPhone" class="ltr-in" inputmode="tel" placeholder="9xxx xxxx" dir="ltr" style="text-align:start"></div>
+            <div class="fld"><label data-i18n="date"></label><input type="date" id="nvDate"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="chead"><h3><span class="step">2</span> <span data-i18n="step_items"></span></h3><span class="sub" id="nvCount"></span></div>
+          <div class="pills" id="nvCats"></div>
+          <div class="search" style="max-width:none;margin-bottom:14px"><span class="mg">&#128269;</span><input id="nvSearch" data-i18n-ph="search_items" autocomplete="off"></div>
+          <div class="grid" id="nvGrid"></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="card">
+          <div class="chead"><h3><span class="step">3</span> <span data-i18n="step_bill"></span></h3></div>
+          <div class="cartbox" id="nvCart"></div>
+
+          <div class="sums">
+            <div class="sr"><span data-i18n="subtotal"></span><b id="nvOffice">0.000</b></div>
+            <div class="sr"><span data-i18n="discount"></span><input type="number" id="nvDisc" min="0" step="0.001" placeholder="0.000"></div>
+            <div class="sr" id="nvVatRow"><span><span data-i18n="vat"></span> <span id="nvVatPct">5</span>%</span><b id="nvVatAmt">0.000</b></div>
+            <div class="sr grand"><span data-i18n="total"></span><b id="nvTotal">0.000</b></div>
+          </div>
+
+          <div class="paybox">
+            <div class="fld"><label data-i18n="pay_method"></label>
+              <select id="nvPay"><option value="cash" data-i18n="pay_cash"></option><option value="card" data-i18n="pay_card"></option><option value="transfer" data-i18n="pay_transfer"></option></select></div>
+            <div class="fld"><label data-i18n="paid_now"></label><input type="number" id="nvPaid" min="0" step="0.001" placeholder="0.000"></div>
+          </div>
+          <div class="quick"><button type="button" id="nvPayFull" data-i18n="pay_full"></button><button type="button" id="nvPayNone" data-i18n="pay_credit"></button></div>
+          <div class="balance" id="nvBalance"></div>
+
+          <div class="fld" style="margin-top:12px"><label data-i18n="note"></label><input id="nvNote" data-i18n-ph="note_ph"></div>
+
+          <button class="btn b-main" id="nvSave" type="button">&#10004; <span data-i18n="save_print"></span></button>
+          <div class="duo">
+            <button class="btn b-soft" id="nvSaveOnly" type="button" data-i18n="save_only"></button>
+            <button class="btn b-soft" id="nvClear" type="button" data-i18n="clear"></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ INVOICES ============ -->
+  <div id="view-invoices" class="page">
+    <div class="stats" id="ivStats"></div>
+    <div class="toolbar">
+      <div class="search"><span class="mg">&#128269;</span><input id="ivSearch" data-i18n-ph="search_invoices" autocomplete="off"></div>
+      <input type="date" id="ivFrom" aria-label="from"><input type="date" id="ivTo" aria-label="to">
+      <select id="ivPay"><option value="" data-i18n="all_payments"></option><option value="paid" data-i18n="st_paid"></option><option value="partial" data-i18n="st_partial"></option><option value="unpaid" data-i18n="st_unpaid"></option><option value="void" data-i18n="voided"></option></select>
+      <select id="ivType"><option value="" data-i18n="all_types"></option><option value="store" data-i18n="type_store"></option><option value="delivery" data-i18n="type_delivery"></option></select>
+      <button class="tbtn b-soft" id="ivReset" type="button" title="" data-i18n-title="clear_filters_tip">&#10006; <span data-i18n="clear_filters"></span></button>
+      <span class="grow"></span>
+      <button class="tbtn b-ok" id="ivExport" type="button">&#128202; <span data-i18n="export_excel"></span></button>
+      <button class="tbtn b-danger" id="ivDelete" type="button">&#128465; <span data-i18n="delete_bills"></span></button>
+    </div>
+    <div class="selbar" id="ivSelBar" hidden>
+      <label class="selall"><input type="checkbox" id="ivSelAll"> <span data-i18n="select_all"></span></label>
+      <span class="selcount" id="ivSelCount"></span>
+      <span class="selhint" data-i18n="select_hint"></span>
+      <span class="grow"></span>
+      <button class="tbtn b-danger" id="ivDoDelete" type="button" disabled></button>
+      <button class="tbtn b-soft" id="ivCancelDelete" type="button" data-i18n="cancel"></button>
+    </div>
+    <div class="tblcard"><div class="tblwrap"><table class="rtable">
+      <thead><tr><th class="ckcol" id="ivCkTh" hidden></th><th data-i18n="invoice_no"></th><th data-i18n="date"></th><th data-i18n="customer"></th><th data-i18n="order_type"></th><th data-i18n="total"></th><th data-i18n="payment"></th><th></th></tr></thead>
+      <tbody id="ivBody"></tbody>
+    </table></div></div>
+  </div>
+
+  <!-- ============ SERVICES ============ -->
+  <div id="view-services" class="page">
+    <div class="card">
+      <div class="chead"><h3>&#128717; <span data-i18n="price_list"></span></h3>
+        <div style="display:flex;gap:9px;flex-wrap:wrap">
+          <button class="tbtn b-ok" id="svAdd" type="button">&#10133; <span data-i18n="add_service"></span></button>
+          <button class="tbtn b-info" id="svManage" type="button">&#9881; <span data-i18n="manage_lists"></span></button>
+        </div></div>
+      <p class="hint" style="margin-top:0" data-i18n="price_list_hint"></p>
+      <div class="pills" id="svCats" style="margin-top:14px"></div>
+      <div class="search" style="max-width:none;margin-bottom:14px"><span class="mg">&#128269;</span><input id="svSearch" data-i18n-ph="search_items" autocomplete="off"></div>
+      <div class="tblwrap"><table class="rtable">
+        <thead><tr><th data-i18n="category"></th><th data-i18n="item"></th><th data-i18n="unit"></th><th data-i18n="price"></th><th></th></tr></thead>
+        <tbody id="svBody"></tbody>
+      </table></div>
+    </div>
+  </div>
+
+  <!-- ============ REPORTS ============ -->
+  <div id="view-reports" class="page">
+    <div class="toolbar">
+      <div class="pills" id="rpPeriods" style="margin:0">
+        <button type="button" data-p="today" data-i18n="p_today"></button><button type="button" data-p="yesterday" data-i18n="p_yesterday"></button>
+        <button type="button" data-p="week" data-i18n="p_week"></button><button type="button" data-p="month" class="active" data-i18n="p_month"></button>
+        <button type="button" data-p="all" data-i18n="p_all"></button><button type="button" data-p="custom" data-i18n="p_custom"></button>
+      </div>
+      <span id="rpCustom" style="display:none;gap:8px;align-items:center"><input type="date" id="rpFrom" aria-label="from"><input type="date" id="rpTo" aria-label="to"></span>
+      <span class="grow"></span>
+      <button class="tbtn b-ok" id="rpExport" type="button">&#128202; <span data-i18n="export_excel"></span></button>
+    </div>
+    <div class="stats" id="rpStats"></div>
+    <div class="card"><div class="chead"><h3 data-i18n="r_by_category"></h3></div><div id="rpCatBars"></div></div>
+    <div class="card" style="margin-top:18px"><div class="chead"><h3 data-i18n="r_daily"></h3></div><div class="cols" id="rpDays"></div></div>
+    <div class="two">
+      <div class="card"><div class="chead"><h3 data-i18n="r_top_items"></h3></div><div id="rpCusts"></div></div>
+      <div class="card"><div class="chead"><h3 data-i18n="r_payment_methods"></h3></div><div id="rpMethods"></div></div>
+    </div>
+    <div class="two" style="margin-top:18px">
+      <div class="card"><div class="chead"><h3 data-i18n="r_order_types"></h3></div><div id="rpTypes"></div></div>
+      <div></div>
+    </div>
+  </div>
+
+  <!-- ============ SETTINGS ============ -->
+  <div id="view-settings" class="page">
+    <div class="card setcard"><div class="chead"><h3>&#128268; <span data-i18n="st_storage"></span></h3></div><div id="stMode"></div><div id="stHealth" class="healthbox" hidden></div></div>
+
+    <div class="card setcard" id="stSubCard" style="margin-top:18px">
+      <div class="chead"><h3>&#128197; <span data-i18n="st_subscription"></span></h3><span class="chip c-ok" id="subChip"></span></div>
+      <div class="subgrid">
+        <div class="subbox"><b id="subD">0</b><small data-i18n="sub_days"></small></div>
+        <div class="subbox"><b id="subH">00</b><small data-i18n="sub_hours"></small></div>
+        <div class="subbox"><b id="subM">00</b><small data-i18n="sub_minutes"></small></div>
+        <div class="subbox"><b id="subS">00</b><small data-i18n="sub_seconds"></small></div>
+      </div>
+      <div class="subtrack"><div class="subfill" id="subBar"></div></div>
+      <div class="submeta"><span id="subPct"></span><span><span data-i18n="sub_started"></span>: <b id="subStart"></b></span></div>
+      <div class="subnext"><span data-i18n="sub_next_payment"></span><b id="subEnd"></b></div>
+      <p class="hint" style="margin-top:10px" data-i18n="sub_hint"></p>
+    </div>
+
+    <div class="card setcard" id="stBizCard" style="margin-top:18px">
+      <div class="chead"><h3>&#127970; <span data-i18n="st_business"></span></h3></div>
+      <div class="setgrid">
+        <div class="fld"><label data-i18n="st_name_en"></label><input id="stName" dir="ltr" style="text-align:start"></div>
+        <div class="fld"><label data-i18n="st_name_ar"></label><input id="stNameAr" dir="rtl"></div>
+        <div class="fld"><label data-i18n="st_addr_en"></label><input id="stAddr" dir="ltr" style="text-align:start"></div>
+        <div class="fld"><label data-i18n="st_addr_ar"></label><input id="stAddrAr" dir="rtl"></div>
+        <div class="fld"><label data-i18n="phone"></label><input id="stPhone" dir="ltr" style="text-align:start"></div>
+        <div class="fld"><label data-i18n="email"></label><input id="stEmail" dir="ltr" style="text-align:start"></div>
+        <div class="fld"><label data-i18n="st_cr"></label><input id="stCr" dir="ltr" style="text-align:start"></div>
+        <div class="fld"><label data-i18n="st_invoice_prefix"></label><input id="stPrefix" dir="ltr" style="text-align:start" maxlength="8"></div>
+        <div class="fld"><label data-i18n="st_paper"></label><select id="stPaper"><option value="80" data-i18n="paper_80"></option><option value="58" data-i18n="paper_58"></option><option value="a4" data-i18n="paper_a4"></option></select></div>
+        <div class="fld"><label data-i18n="st_bank"></label><input id="stBank"></div>
+        <div class="fld" style="grid-column:1/-1"><label data-i18n="st_footer"></label><input id="stFooter"></div>
+        <div class="fld" style="grid-column:1/-1"><label data-i18n="st_terms"></label><input id="stTerms"></div>
+      </div>
+      <label class="switch"><input type="checkbox" id="stVatOn"> <span data-i18n="st_vat_on"></span></label>
+      <div class="setgrid" style="margin-top:12px">
+        <div class="fld"><label data-i18n="st_vat_no"></label><input id="stVatNo" dir="ltr" style="text-align:start"></div>
+        <div class="fld"><label data-i18n="st_vat_pct"></label><input id="stVatPct" type="number" step="0.5" min="0"></div>
+      </div>
+      <p class="hint" data-i18n="st_vat_hint"></p>
+      <button class="btn b-main" id="stSave" type="button" data-i18n="save"></button>
+    </div>
+
+    <div class="card setcard" id="stAccountCard">
+      <div class="chead"><h3>&#128273; <span data-i18n="st_my_password"></span></h3></div>
+      <div class="setgrid">
+        <div class="fld"><label data-i18n="current_password"></label><input id="pwOld" type="password" autocomplete="current-password"></div>
+        <span></span>
+        <div class="fld"><label data-i18n="new_password"></label><input id="pwNew" type="password" autocomplete="new-password"></div>
+        <div class="fld"><label data-i18n="password_again"></label><input id="pwNew2" type="password" autocomplete="new-password"></div>
+      </div>
+      <div class="err" id="pwErr"></div>
+      <button class="btn b-soft" id="pwSave" type="button" style="max-width:260px" data-i18n="change_password"></button>
+    </div>
+
+    <div class="card setcard" id="stUsersCard">
+      <div class="chead"><h3>&#128101; <span data-i18n="st_staff"></span></h3></div>
+      <p class="hint" id="usHint" style="margin-top:0" data-i18n="st_staff_hint"></p>
+      <div class="tblwrap" style="margin:12px 0"><table><thead><tr><th data-i18n="your_name"></th><th data-i18n="username"></th><th data-i18n="role"></th><th></th></tr></thead><tbody id="usList"></tbody></table></div>
+      <div id="usForm"><div class="setgrid">
+        <div class="fld"><label data-i18n="your_name"></label><input id="usName"></div>
+        <div class="fld"><label data-i18n="username"></label><input id="usUser" dir="ltr" style="text-align:start" autocapitalize="none"></div>
+        <div class="fld"><label data-i18n="password_min"></label><input id="usPass" type="password" autocomplete="new-password"></div>
+        <div class="fld"><label data-i18n="role"></label><select id="usRole"><option value="cashier" data-i18n="role_cashier"></option><option value="admin" data-i18n="role_admin"></option></select></div>
+      </div>
+      <div class="err" id="usErr"></div>
+      <button class="btn b-soft" id="usAdd" type="button" style="max-width:260px" data-i18n="add_user"></button></div>
+    </div>
+
+    <div class="card setcard" id="stDataCard">
+      <div class="chead"><h3>&#128190; <span data-i18n="st_data"></span></h3></div>
+      <p class="hint" style="margin-top:0" data-i18n="st_data_hint"></p>
+      <div class="duo" style="max-width:560px">
+        <button class="btn b-info" id="dbBackup" type="button">&#128190; <span data-i18n="backup"></span></button>
+        <button class="btn b-soft" id="dbRestore" type="button">&#128194; <span data-i18n="restore"></span></button>
+        <button class="btn b-danger" id="dbWipe" type="button">&#128465; <span data-i18n="wipe"></span></button>
+      </div>
+      <input type="file" id="dbFile" accept=".json,application/json" style="display:none">
+    </div>
+  </div>
+</main>
+
+<!-- ================= MODALS ================= -->
+<div class="modal" id="ivModal" hidden><div class="mbox wide" id="ivBox"></div></div>
+
+<div class="modal" id="customModal" hidden><div class="mbox">
+  <h3 data-i18n="custom_service"></h3><div class="msub" data-i18n="custom_service_hint"></div>
+  <div class="fields">
+    <div class="fld full"><label data-i18n="description"></label><input id="clName"></div>
+    <div class="fld"><label data-i18n="amount_omr"></label><input type="number" id="clAmount" step="0.001" min="0" placeholder="0.000"></div>
+    <div class="fld"><label data-i18n="qty"></label><input type="number" id="clQty" step="any" min="0" value="1"></div>
+  </div>
+  <div class="err" id="clErr"></div>
+  <div class="duo"><button class="btn b-main" style="margin-top:0" id="clAdd" type="button" data-i18n="add_to_invoice"></button><button class="btn b-soft" type="button" data-close data-i18n="cancel"></button></div>
+</div></div>
+
+<div class="modal" id="svcModal" hidden><div class="mbox">
+  <h3 id="smTitle"></h3><div class="msub" data-i18n="service_hint"></div>
+  <div class="fields">
+    <div class="fld"><label data-i18n="name_en"></label><input id="smEn" dir="ltr" style="text-align:start"></div>
+    <div class="fld"><label data-i18n="name_ar"></label><input id="smAr" dir="rtl"></div>
+    <div class="fld"><label data-i18n="category"></label><select id="smCat"></select></div>
+    <div class="fld"><label data-i18n="unit"></label><select id="smUnit"></select></div>
+    <div class="fld full newbox" id="smNewCatWrap" hidden><label data-i18n="new_section_name"></label>
+      <div class="two-in"><input id="smNewCatEn" dir="ltr" placeholder="English" style="text-align:start"><input id="smNewCatAr" dir="rtl" placeholder="العربية"></div></div>
+    <div class="fld full newbox" id="smNewUnitWrap" hidden><label data-i18n="new_unit_name"></label>
+      <div class="two-in"><input id="smNewUnitEn" dir="ltr" placeholder="English" style="text-align:start"><input id="smNewUnitAr" dir="rtl" placeholder="العربية"></div></div>
+    <div class="fld full"><label data-i18n="default_price"></label><input type="number" id="smPrice" step="0.001" min="0" placeholder="0.000"></div>
+  </div>
+  <div class="err" id="smErr"></div>
+  <div class="duo"><button class="btn b-main" style="margin-top:0" id="smSave" type="button" data-i18n="save"></button><button class="btn b-soft" type="button" data-close data-i18n="cancel"></button></div>
+</div></div>
+
+<div class="modal" id="manageModal" hidden><div class="mbox">
+  <h3 data-i18n="manage_lists"></h3><div class="msub" data-i18n="manage_hint"></div>
+  <h4 class="mgh" data-i18n="custom_sections"></h4><div id="mgCats"></div>
+  <h4 class="mgh" data-i18n="custom_units"></h4><div id="mgUnits"></div>
+  <button class="btn b-soft" type="button" data-close style="margin-top:16px" data-i18n="close"></button>
+</div></div>
+
+<button type="button" class="cartbar" id="nvBar" hidden><span id="nvBarTxt"></span><b data-i18n="view_bill"></b></button>
+
+<div class="toast" id="toast"></div>
+<div id="printArea"></div>
+
+<script src="js/i18n.js?v=ce53e363"></script>
+<script src="js/core.js?v=93e0a461"></script>
+<script src="js/catalog.js?v=a0b34035"></script>
+<script src="js/xlsx.js?v=1d957b6d"></script>
+<script src="js/demo-data.js?v=c072d9c5"></script>
+<script src="js/store.js?v=576d7f8f"></script>
+<script src="js/print.js?v=aac126ae"></script>
+<script src="js/invoice.js?v=8416be98"></script>
+<script src="js/invoices.js?v=bcb936bc"></script>
+<script src="js/services.js?v=1a242449"></script>
+<script src="js/reports.js?v=4aa6d440"></script>
+<script src="js/settings.js?v=3d232fb0"></script>
+<script src="js/app.js?v=e7716f94"></script>
+<script src="js/demo-mode.js?v=519d6431"></script>
+</body>
+</html>

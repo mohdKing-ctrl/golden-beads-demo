@@ -1,0 +1,13 @@
+/* demo.css - the public DEMO copy only */
+.demobar2{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:var(--goldsoft);color:var(--goldtxt);border-bottom:1.5px solid var(--gold);
+  padding:10px 26px;font-weight:700;font-size:13px;line-height:1.7}
+.demobar2 .grow{flex:1;min-width:220px}
+.demobar2 button{border:1.5px solid var(--gold);background:var(--surface);color:var(--goldtxt);border-radius:10px;padding:7px 14px;font-weight:800;font-size:12.5px;cursor:pointer;font-family:inherit}
+.demobar2 button:hover{background:var(--gold);color:#fff}
+@media(max-width:900px){.demobar2{padding:10px 14px}}
+.demonote{margin-top:18px}
+
+/* every bill printed from the demo carries a demo mark */
+#printArea .inv{position:relative}
+#printArea .inv::after{content:"DEMO - نسخة تجريبية";position:absolute;top:38%;left:0;right:0;text-align:center;font-size:56pt;font-weight:800;color:rgba(29,27,24,.10);transform:rotate(-24deg);pointer-events:none}
+#printArea .rc::after{content:"DEMO / نسخة تجريبية";display:block;text-align:center;font-weight:bold;border:1.5px dashed #000;margin-top:8px;padding:3px}
